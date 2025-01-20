@@ -74,6 +74,25 @@ int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params) {
     return ADXL345_STATUS_INIT_ERR;
   }
 
+  dev->power_mode = adxl345_params.power_mode;
+  dev->odr = adxl345_params.odr;
+  dev->resolution = adxl345_params.resolution;
+  dev->scale = adxl345_params.scale;
+
+  ret |= adxl345_set_measure_mode(&dev, ADXL345_STANDBY_MODE);
+  ret |= adxl345_set_power_mode(&dev, dev->power_mode);
+  ret |= adxl345_set_odr(&dev, dev->odr);
+  ret |= adxl345_set_scale(&dev, dev->scale);
+  ret |= adxl345_set_resolution(&dev, dev->resolution);
+  ret |= adxl345_set_measure_mode(&dev, ADXL345_MEASURE_MODE);
+  
+  if (ret == ADXL345_STATUS_SUCCESS) {
+    dev->is_Setup = true;
+  }
+  else {
+    dev->is_Setup = false;
+  }
+
   return ret;
 }
 
@@ -474,7 +493,7 @@ int8_t adxl345_get_activity_tap_status(adxl345_dev *device) {
 }
 
 // ADD DOXYGEN
-int8_t adxl345_set_interrupt_status(adxl345_dev *device, uint8_t interrupt,
+int8_t adxl345_set_interrupt_enable(adxl345_dev *device, uint8_t interrupt,
                                     int enable) {
   uint8_t val = 0x00;
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE, &val) !=

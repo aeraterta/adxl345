@@ -291,11 +291,13 @@ int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout);
 
 int8_t adxl345_get_activity_tap_status(adxl345_dev *device);
 
-int8_t adxl345_set_interrupt_status(adxl345_dev *device, uint8_t interrupt,
+int8_t adxl345_set_interrupt_enable(adxl345_dev *device, uint8_t interrupt,
                                     int enable);
 
 int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
                                  int map);
+
+int8_t adxl345_get_interrupt_status(adxl345_dev *device);
 
 int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data);
 
