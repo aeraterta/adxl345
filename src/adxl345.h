@@ -66,6 +66,11 @@ typedef enum {
 #define ADXL345_INT_WATERMARK  0x01
 #define ADXL345_INT_OVERRUNY   0x00
 
+#define ADXL345_RES_10BIT_MASK 0x06
+#define ADXL345_RES_11BIT_MASK 0x05
+#define ADXL345_RES_12BIT_MASK 0x04
+#define ADXL345_RES_13BIT_MASK 0x03
+
 #define ADXL345_INT1_PIN 0x00
 #define ADXL345_INT2_PIN 0x01
 
@@ -142,7 +147,7 @@ typedef enum {
 
 typedef enum {
   ADXL345_RES_10BIT = 0x00,
-  ADXL345_RES_16BIT = 0x01,
+  ADXL345_RES_FULL = 0x01,
 } adxl345_resolution;
 
 typedef enum {

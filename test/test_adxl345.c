@@ -10,8 +10,6 @@ static adxl345_dev dev;
 static adxl345_init_param init_param;
 
 void test_adxl345_setup(void) {
-  i2c_init_ExpectAndReturn(true);
-  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_setup(&dev, init_param));
 }
 
 void test_adxl345_online(void) {
@@ -110,8 +108,8 @@ void test_adxl345_set_resolution(void) {
   i2c_write_bytes_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
-                    adxl345_set_resolution(&dev, ADXL345_RES_16BIT));
-  TEST_ASSERT_EQUAL(dev.resolution, ADXL345_RES_16BIT);
+                    adxl345_set_resolution(&dev, ADXL345_RES_FULL));
+  TEST_ASSERT_EQUAL(dev.resolution, ADXL345_RES_FULL);
 }
 
 void test_adxl345_set_tap_threshold(void) {

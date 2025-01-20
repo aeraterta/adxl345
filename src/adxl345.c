@@ -79,12 +79,15 @@ int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params) {
   dev->resolution = adxl345_params.resolution;
   dev->scale = adxl345_params.scale;
 
-  ret |= adxl345_set_measure_mode(&dev, ADXL345_STANDBY_MODE);
-  ret |= adxl345_set_power_mode(&dev, dev->power_mode);
-  ret |= adxl345_set_odr(&dev, dev->odr);
-  ret |= adxl345_set_scale(&dev, dev->scale);
-  ret |= adxl345_set_resolution(&dev, dev->resolution);
-  ret |= adxl345_set_measure_mode(&dev, ADXL345_MEASURE_MODE);
+  ret |= adxl345_set_measure_mode(dev, ADXL345_STANDBY_MODE);
+  ret |= adxl345_set_power_mode(dev, dev->power_mode);
+  ret |= adxl345_set_odr(dev, dev->odr);
+  ret |= adxl345_set_scale(dev, dev->scale);
+  ret |= adxl345_set_resolution(dev, dev->resolution);
+  ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_DATA_READY, 1);
+  ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_WATERMARK, 1);
+  ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_OVERRUNY, 1);
+  ret |= adxl345_set_measure_mode(dev, ADXL345_MEASURE_MODE);
   
   if (ret == ADXL345_STATUS_SUCCESS) {
     dev->is_Setup = true;
@@ -557,10 +560,23 @@ int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data) {
   }
 
   if (device->resolution == ADXL345_RES_10BIT){
-    data->x = ((val_h << 8) | val_l) >> 6;
+    data->x = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
   }
   else {
-    data->x = (val_h << 8) | val_l;
+    switch (device->scale){
+      case ADXL345_SCALE_2G:
+        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
+        break;
+      case ADXL345_SCALE_4G:
+        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
+        break;
+      case ADXL345_SCALE_8G:
+        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
+        break;
+      case ADXL345_SCALE_16G:
+        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
+        break; 
+    }
   }
 
   return ADXL345_STATUS_SUCCESS;
@@ -581,10 +597,23 @@ int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data) {
   }
 
   if (device->resolution == ADXL345_RES_10BIT){
-    data->y = ((val_h << 8) | val_l) >> 6;
+    data->y = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
   }
   else {
-    data->y = (val_h << 8) | val_l;
+    switch (device->scale){
+      case ADXL345_SCALE_2G:
+        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
+        break;
+      case ADXL345_SCALE_4G:
+        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
+        break;
+      case ADXL345_SCALE_8G:
+        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
+        break;
+      case ADXL345_SCALE_16G:
+        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
+        break; 
+    }
   }
 
   return ADXL345_STATUS_SUCCESS;
@@ -605,10 +634,23 @@ int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data) {
   }
 
   if (device->resolution == ADXL345_RES_10BIT){
-    data->z = ((val_h << 8) | val_l) >> 6;
+    data->z = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
   }
   else {
-    data->z = (val_h << 8) | val_l;
+    switch (device->scale){
+      case ADXL345_SCALE_2G:
+        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
+        break;
+      case ADXL345_SCALE_4G:
+        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
+        break;
+      case ADXL345_SCALE_8G:
+        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
+        break;
+      case ADXL345_SCALE_16G:
+        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
+        break; 
+    }
   }
 
   return ADXL345_STATUS_SUCCESS;
