@@ -240,8 +240,8 @@ int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale) {
  *   - 0 on success.
  *   - Non-zero error code on failure.
  */
-int8_t adxl345_acc_set_resolution(adxl345_dev *device,
-                                  adxl345_resolution resolution) {
+int8_t adxl345_set_resolution(adxl345_dev *device,
+                              adxl345_resolution resolution) {
   uint8_t val = 0x00;
 
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT, &val) !=
@@ -366,6 +366,25 @@ int8_t adxl345_set_tap_window(adxl345_dev *device, int8_t window) {
 }
 
 // ADD DOXYGEN
+int8_t adxl345_tap_axes_enable(adxl345_dev *device,
+                               adxl345_axes_enable tap_en) {
+  uint8_t val = 0x00;
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_TAP_AXES, &val) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  val &= ~0x07;
+  val = val | tap_en << ADXL345_TAP_EN_MASK;
+
+  device->tap_config.tap_en = tap_en;
+
+  uint8_t data_buffer[] = {ADXL345_REG_TAP_AXES, val};
+  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+}
+
+// ADD DOXYGEN
 int8_t adxl345_set_activity_threshold(adxl345_dev *device, int8_t threshold) {
   device->activity_config.activity_threshold = threshold;
 
@@ -382,8 +401,8 @@ int8_t adxl345_set_inactivity_threshold(adxl345_dev *device, int8_t threshold) {
 }
 
 // ADD DOXYGEN
-int8_t adxl345_enable_axes_activity(adxl345_dev *device,
-                                    adxl345_axes_enable activity_en) {
+int8_t adxl345_set_activity_axes_enable(adxl345_dev *device,
+                                        adxl345_axes_enable activity_en) {
   uint8_t val = 0x00;
 
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_INACT_CTL, &val) !=
@@ -401,8 +420,8 @@ int8_t adxl345_enable_axes_activity(adxl345_dev *device,
 }
 
 // ADD DOXYGEN
-int8_t adxl345_enable_axes_inactivity(adxl345_dev *device,
-                                      adxl345_axes_enable inactivity_en) {
+int8_t adxl345_set_inactivity_axes_enable(adxl345_dev *device,
+                                          adxl345_axes_enable inactivity_en) {
   uint8_t val = 0x00;
 
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_INACT_CTL, &val) !=
@@ -436,29 +455,142 @@ int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout) {
 }
 
 // ADD DOXYGEN
-int8_t adxl345_tap_axes_enable(adxl345_dev *device,
-                               adxl345_axes_enable tap_en) {
-  uint8_t val = 0x00;
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_TAP_AXES, &val) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  val &= ~0x07;
-  val = val | tap_en << ADXL345_TAP_EN_MASK;
-
-  device->tap_config.tap_en = tap_en;
-
-  uint8_t data_buffer[] = {ADXL345_REG_TAP_AXES, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
-}
-
-int8_t adxl345_get_trigger_source(adxl345_dev *device) {
+int8_t adxl345_get_activity_tap_status(adxl345_dev *device) {
   uint8_t val = 0x00;
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_TAP_STATUS, &val) !=
       ADXL345_STATUS_SUCCESS) {
     return ADXL345_STATUS_API_ERR;
   }
+
+  device->activity_config.activity_status.x = (bool)(val & (1 << 6));
+  device->activity_config.activity_status.y = (bool)(val & (1 << 5));
+  device->activity_config.activity_status.z = (bool)(val & (1 << 4));
+
+  device->tap_config.tap_status.x = (bool)(val & (1 << 2));
+  device->tap_config.tap_status.y = (bool)(val & (1 << 1));
+  device->tap_config.tap_status.z = (bool)(val & 1);
+
+  return ADXL345_STATUS_SUCCESS;
+}
+
+// ADD DOXYGEN
+int8_t adxl345_set_interrupt_status(adxl345_dev *device, uint8_t interrupt,
+                                    int enable) {
+  uint8_t val = 0x00;
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE, &val) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  val = val | enable << interrupt;
+
+  uint8_t data_buffer[] = {ADXL345_REG_INT_ENABLE, val};
+  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+}
+
+// ADD DOXYGEN
+int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
+                                 int map) {
+  uint8_t val = 0x00;
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_MAP, &val) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  val = val | map << interrupt;
+
+  uint8_t data_buffer[] = {ADXL345_REG_INT_MAP, val};
+  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+}
+
+// ADD DOXYGEN
+int8_t adxl345_get_interrupt_status(adxl345_dev *device) {
+  uint8_t val = 0x00;
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_SOURCE, &val) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  device->interrupt_status.data_ready = (bool)(val & (1 << 7));
+  device->interrupt_status.single_tap = (bool)(val & (1 << 6));
+  device->interrupt_status.double_tap = (bool)(val & (1 << 5));
+  device->interrupt_status.activity   = (bool)(val & (1 << 4));
+  device->interrupt_status.inactivity = (bool)(val & (1 << 3));
+  device->interrupt_status.free_fall  = (bool)(val & (1 << 2));
+  device->interrupt_status.watermark  = (bool)(val & (1 << 1));
+  device->interrupt_status.overrun    = (bool)(val & 1);
+
+  return ADXL345_STATUS_SUCCESS;
+}
+
+int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data) {
+  uint8_t val_l = 0x00;
+  uint8_t val_h = 0x00;
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX1, &val_h) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX0, &val_l) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (device->resolution == ADXL345_RES_10BIT){
+    data->x = ((val_h << 8) | val_l) >> 6;
+  }
+  else {
+    data->x = (val_h << 8) | val_l;
+  }
+
+  return ADXL345_STATUS_SUCCESS;
+}
+
+int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data) {
+  uint8_t val_l = 0x00;
+  uint8_t val_h = 0x00;
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY1, &val_h) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY0, &val_l) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (device->resolution == ADXL345_RES_10BIT){
+    data->y = ((val_h << 8) | val_l) >> 6;
+  }
+  else {
+    data->y = (val_h << 8) | val_l;
+  }
+
+  return ADXL345_STATUS_SUCCESS;
+}
+
+int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data) {
+  uint8_t val_l = 0x00;
+  uint8_t val_h = 0x00;
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ1, &val_h) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ0, &val_l) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (device->resolution == ADXL345_RES_10BIT){
+    data->z = ((val_h << 8) | val_l) >> 6;
+  }
+  else {
+    data->z = (val_h << 8) | val_l;
+  }
+
   return ADXL345_STATUS_SUCCESS;
 }

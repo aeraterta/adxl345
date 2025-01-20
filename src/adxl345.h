@@ -27,6 +27,12 @@
 
 #include "utils/i2c.h"
 
+typedef struct {
+  int16_t x;
+  int16_t y;
+  int16_t z;
+} adxl345_axes_data;
+
 /*******************************STATUSES***************************************/
 typedef enum {
   ADXL345_STATUS_SUCCESS   = 0,
@@ -50,6 +56,18 @@ typedef enum {
 #define ADXL345_ACTIVITY_EN_MASK   0x04
 #define ADXL345_INACTIVITY_EN_MASK 0x00
 #define ADXL345_TAP_EN_MASK        0x00
+
+#define ADXL345_INT_DATA_READY 0x07
+#define ADXL345_INT_SINGLE_TAP 0x06
+#define ADXL345_INT_DOUBLE_TAP 0x05
+#define ADXL345_INT_ACTIVITY   0x04
+#define ADXL345_INT_INACTIVITY 0x03
+#define ADXL345_INT_FREE_FALL  0x02
+#define ADXL345_INT_WATERMARK  0x01
+#define ADXL345_INT_OVERRUNY   0x00
+
+#define ADXL345_INT1_PIN 0x00
+#define ADXL345_INT2_PIN 0x01
 
 /*********************************REGISTERS************************************/
 
@@ -128,14 +146,14 @@ typedef enum {
 } adxl345_resolution;
 
 typedef enum {
-  ACC_AXES_DISABLE_ALL = 0x00,
-  ACC_AXES_ENABLE_X    = 0x01,
-  ACC_AXES_ENABLE_Y    = 0x02,
-  ACC_AXES_ENABLE_Z    = 0x04,
-  ACC_AXES_ENABLE_XY   = 0x03,
-  ACC_AXES_ENABLE_XZ   = 0x05,
-  ACC_AXES_ENABLE_YZ   = 0x06,
-  ACC_AXES_ENABLE_XYZ  = 0x07
+  AXES_DISABLE_ALL = 0x00,
+  AXES_ENABLE_X    = 0x01,
+  AXES_ENABLE_Y    = 0x02,
+  AXES_ENABLE_Z    = 0x04,
+  AXES_ENABLE_XY   = 0x03,
+  AXES_ENABLE_XZ   = 0x05,
+  AXES_ENABLE_YZ   = 0x06,
+  AXES_ENABLE_XYZ  = 0x07
 } adxl345_axes_enable;
 
 typedef struct {
@@ -143,6 +161,17 @@ typedef struct {
   bool y;
   bool z;
 } axes_status;
+
+typedef struct {
+  bool data_ready;
+  bool single_tap;
+  bool double_tap;
+  bool activity;
+  bool inactivity;
+  bool free_fall;
+  bool watermark;
+  bool overrun;
+} interrupt_status;
 
 typedef struct {
   int8_t x;
@@ -157,6 +186,7 @@ typedef struct {
   uint8_t window;
   adxl345_axes_enable tap_en;
   axes_status axes_status;
+  axes_status tap_status;
 } tap_config;
 
 typedef struct {
@@ -165,6 +195,7 @@ typedef struct {
   adxl345_axes_enable activity_en;
   adxl345_axes_enable inactivity_en;
   axes_status axes_status;
+  axes_status activity_status;
 } activity_config;
 
 typedef struct {
@@ -180,6 +211,7 @@ typedef struct {
   adxl345_measure_mode measure;
   adxl345_scale scale;
   adxl345_odr odr;
+  interrupt_status interrupt_status;
 
   activity_config activity_config;
   freefall_config freefall_config;
@@ -195,6 +227,7 @@ typedef struct {
   adxl345_measure_mode measure;
   adxl345_scale scale;
   adxl345_odr odr;
+  interrupt_status interrupt_status;
 
   activity_config activity_config;
   freefall_config freefall_config;
@@ -216,15 +249,15 @@ bool adxl345_online(void);
 
 int8_t adxl345_set_power_mode(adxl345_dev *device, adxl345_power_mode mode);
 
+int8_t adxl345_set_measure_mode(adxl345_dev *device,
+                                adxl345_measure_mode measure);
+
 int8_t adxl345_set_odr(adxl345_dev *device, adxl345_odr odr);
 
 int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale);
 
-int8_t adxl345_acc_set_resolution(adxl345_dev *device,
-                                  adxl345_resolution resolution);
-
-int8_t adxl345_set_measure_mode(adxl345_dev *device,
-                                adxl345_measure_mode measure);
+int8_t adxl345_set_resolution(adxl345_dev *device,
+                              adxl345_resolution resolution);
 
 int8_t adxl345_set_offset_x(adxl345_dev *device, int8_t offset);
 
@@ -240,17 +273,33 @@ int8_t adxl345_set_tap_latency(adxl345_dev *device, int8_t latency);
 
 int8_t adxl345_set_tap_window(adxl345_dev *device, int8_t window);
 
+int8_t adxl345_tap_axes_enable(adxl345_dev *device, adxl345_axes_enable tap_en);
+
 int8_t adxl345_set_activity_threshold(adxl345_dev *device, int8_t threshold);
 
-int8_t adxl345_enable_axes_activity(adxl345_dev *device,
-                                    adxl345_axes_enable activity_en);
+int8_t adxl345_set_inactivity_threshold(adxl345_dev *device, int8_t threshold);
 
-int8_t adxl345_enable_axes_inactivity(adxl345_dev *device,
-                                      adxl345_axes_enable inactivity_en);
+int8_t adxl345_set_activity_axes_enable(adxl345_dev *device,
+                                        adxl345_axes_enable activity_en);
+
+int8_t adxl345_set_inactivity_axes_enable(adxl345_dev *device,
+                                          adxl345_axes_enable inactivity_en);
 
 int8_t adxl345_set_freefall_threshold(adxl345_dev *device, int8_t threshold);
 
-int8_t adxl345_tap_axes_enable(adxl345_dev *device, adxl345_axes_enable tap_en);
+int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout);
 
-int8_t adxl345_get_trigger_source(adxl345_dev *device);
+int8_t adxl345_get_activity_tap_status(adxl345_dev *device);
+
+int8_t adxl345_set_interrupt_status(adxl345_dev *device, uint8_t interrupt,
+                                    int enable);
+
+int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
+                                 int map);
+
+int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data);
+
+int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data);
+
+int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data);
 #endif
