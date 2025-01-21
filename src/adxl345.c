@@ -642,11 +642,6 @@ int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data) {
 int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val[6];
 
-  printf("resolution: %d\r\n", device->resolution.resolution);
-  printf("bits: %d\r\n", device->resolution.bits);
-  printf("mask: %d\r\n", device->resolution.mask);
-  printf("scale: %d\r\n", device->scale.scale);
-
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX1, &val[1]) !=
       ADXL345_STATUS_SUCCESS) {
     return ADXL345_STATUS_API_ERR;
@@ -676,10 +671,6 @@ int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
       ADXL345_STATUS_SUCCESS) {
     return ADXL345_STATUS_API_ERR;
   }
-
-  printf("X: 0x%.4X\r\n", (val[1] << 8) | val[0]);
-  printf("Y: 0x%.4X\r\n", (val[3] << 8) | val[3]);
-  printf("Z: 0x%.4X\r\n", (val[5] << 8) | val[4]);
 
   data->raw_data.x = ((val[1] << 8) | val[0]) >> device->resolution.mask;
   data->raw_data.y = ((val[3] << 8) | val[2]) >> device->resolution.mask;

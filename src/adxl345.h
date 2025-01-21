@@ -28,11 +28,6 @@
 #include "utils/i2c.h"
 
 /*******************************CONSTANTS**************************************/
-#define SENSITIVITY_FULL_RES  3.9
-#define SENSITIVITY_10BIT_2G  3.9
-#define SENSITIVITY_10BIT_4G  7.8
-#define SENSITIVITY_10BIT_8G  15.6
-#define SENSITIVITY_10BIT_16G 31.2
 
 #define ADXL345_INT1_PIN 0x00
 #define ADXL345_INT2_PIN 0x01
