@@ -27,10 +27,30 @@
 
 #include "utils/i2c.h"
 
+/*******************************CONSTANTS**************************************/
+#define SENSITIVITY_FULL_RES  3.9
+#define SENSITIVITY_10BIT_2G  3.9
+#define SENSITIVITY_10BIT_4G  7.8
+#define SENSITIVITY_10BIT_8G  15.6
+#define SENSITIVITY_10BIT_16G 31.2
+
+#define ADXL345_INT1_PIN 0x00
+#define ADXL345_INT2_PIN 0x01
+
+/*******************************DATASETS***************************************/
 typedef struct {
   int16_t x;
   int16_t y;
   int16_t z;
+} raw_data;
+typedef struct {
+  float x;
+  float y;
+  float z;
+} acc_data;
+typedef struct {
+  raw_data raw_data;
+  acc_data acc_data;
 } adxl345_axes_data;
 
 /*******************************STATUSES***************************************/
@@ -66,13 +86,10 @@ typedef enum {
 #define ADXL345_INT_WATERMARK  0x01
 #define ADXL345_INT_OVERRUNY   0x00
 
-#define ADXL345_RES_10BIT_MASK 0x06
-#define ADXL345_RES_11BIT_MASK 0x05
-#define ADXL345_RES_12BIT_MASK 0x04
-#define ADXL345_RES_13BIT_MASK 0x03
-
-#define ADXL345_INT1_PIN 0x00
-#define ADXL345_INT2_PIN 0x01
+#define ADXL345_RES_10BIT_MASK 6
+#define ADXL345_RES_11BIT_MASK 5
+#define ADXL345_RES_12BIT_MASK 4
+#define ADXL345_RES_13BIT_MASK 3
 
 /*********************************REGISTERS************************************/
 
@@ -142,13 +159,30 @@ typedef enum {
   ADXL345_SCALE_4G  = 0x01,
   ADXL345_SCALE_8G  = 0x02,
   ADXL345_SCALE_16G = 0x03,
-
 } adxl345_scale;
 
 typedef enum {
+  ADXL345_FULL_SCALE_2G  = 4,
+  ADXL345_FULL_SCALE_4G  = 8,
+  ADXL345_FULL_SCALE_8G  = 16,
+  ADXL345_FULL_SCALE_16G = 32,
+} adxl345_full_scale;
+
+typedef struct {
+  adxl345_scale scale;
+  adxl345_full_scale fs;
+} adxl345_scale_config;
+
+typedef enum {
   ADXL345_RES_10BIT = 0x00,
-  ADXL345_RES_FULL = 0x01,
+  ADXL345_RES_FULL  = 0x01,
 } adxl345_resolution;
+
+typedef struct {
+  adxl345_resolution resolution;
+  int8_t bits;
+  int8_t mask;
+} adxl345_resolution_config;
 
 typedef enum {
   AXES_DISABLE_ALL = 0x00,
@@ -212,12 +246,12 @@ typedef struct {
 
 typedef struct {
   adxl345_power_mode power_mode;
-  adxl345_resolution resolution;
   adxl345_measure_mode measure;
-  adxl345_scale scale;
   adxl345_odr odr;
-  interrupt_status interrupt_status;
+  adxl345_scale_config scale;
+  adxl345_resolution_config resolution;
 
+  interrupt_status interrupt_status;
   activity_config activity_config;
   freefall_config freefall_config;
   offset_config offset_config;
@@ -228,12 +262,12 @@ typedef struct {
 
 typedef struct {
   adxl345_power_mode power_mode;
-  adxl345_resolution resolution;
   adxl345_measure_mode measure;
-  adxl345_scale scale;
   adxl345_odr odr;
-  interrupt_status interrupt_status;
+  adxl345_scale_config scale;
+  adxl345_resolution_config resolution;
 
+  interrupt_status interrupt_status;
   activity_config activity_config;
   freefall_config freefall_config;
   offset_config offset_config;
@@ -259,10 +293,10 @@ int8_t adxl345_set_measure_mode(adxl345_dev *device,
 
 int8_t adxl345_set_odr(adxl345_dev *device, adxl345_odr odr);
 
-int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale);
+int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale_config scale);
 
 int8_t adxl345_set_resolution(adxl345_dev *device,
-                              adxl345_resolution resolution);
+                              adxl345_resolution_config resolution);
 
 int8_t adxl345_set_offset_x(adxl345_dev *device, int8_t offset);
 
@@ -304,9 +338,16 @@ int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
 
 int8_t adxl345_get_interrupt_status(adxl345_dev *device);
 
-int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data);
+int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data);
 
-int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data);
+int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data);
 
-int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data);
+int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data);
+
+int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data);
+
+void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data);
+
+int16_t twos_complement(uint16_t value, int bits);
+
 #endif

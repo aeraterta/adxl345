@@ -9,8 +9,7 @@
 static adxl345_dev dev;
 static adxl345_init_param init_param;
 
-void test_adxl345_setup(void) {
-}
+void test_adxl345_setup(void) {}
 
 void test_adxl345_online(void) {
   uint8_t read_data_result = 0xE5;
@@ -82,6 +81,9 @@ void test_adxl345_set_odr_invalid_odr(void) {
 
 void test_adxl345_set_scale(void) {
   uint8_t read_data_result = 0x00;
+  adxl345_scale_config scale;
+  scale.scale = ADXL345_SCALE_8G;
+
   i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT,
                                 NULL, ADXL345_STATUS_SUCCESS);
   i2c_read_byte_IgnoreArg_read_data();
@@ -91,13 +93,16 @@ void test_adxl345_set_scale(void) {
                                   ADXL345_STATUS_SUCCESS);
   i2c_write_bytes_IgnoreArg_data_buffer();
 
-  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
-                    adxl345_set_scale(&dev, ADXL345_SCALE_8G));
-  TEST_ASSERT_EQUAL(dev.scale, ADXL345_SCALE_8G);
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_set_scale(&dev, scale));
+  TEST_ASSERT_EQUAL(dev.scale.scale, ADXL345_SCALE_8G);
+  TEST_ASSERT_EQUAL(dev.scale.fs, ADXL345_FULL_SCALE_8G);
 }
 
 void test_adxl345_set_resolution(void) {
   uint8_t read_data_result = 0x00;
+  adxl345_resolution_config resolution;
+  resolution.resolution = ADXL345_RES_FULL;
+
   i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT,
                                 NULL, ADXL345_STATUS_SUCCESS);
   i2c_read_byte_IgnoreArg_read_data();
@@ -108,8 +113,10 @@ void test_adxl345_set_resolution(void) {
   i2c_write_bytes_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
-                    adxl345_set_resolution(&dev, ADXL345_RES_FULL));
-  TEST_ASSERT_EQUAL(dev.resolution, ADXL345_RES_FULL);
+                    adxl345_set_resolution(&dev, resolution));
+  TEST_ASSERT_EQUAL(dev.resolution.resolution, ADXL345_RES_FULL);
+  TEST_ASSERT_EQUAL(dev.resolution.bits, 12);
+  TEST_ASSERT_EQUAL(dev.resolution.mask, 4);
 }
 
 void test_adxl345_set_tap_threshold(void) {

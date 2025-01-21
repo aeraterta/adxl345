@@ -75,9 +75,9 @@ int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params) {
   }
 
   dev->power_mode = adxl345_params.power_mode;
-  dev->odr = adxl345_params.odr;
+  dev->odr        = adxl345_params.odr;
   dev->resolution = adxl345_params.resolution;
-  dev->scale = adxl345_params.scale;
+  dev->scale      = adxl345_params.scale;
 
   ret |= adxl345_set_measure_mode(dev, ADXL345_STANDBY_MODE);
   ret |= adxl345_set_power_mode(dev, dev->power_mode);
@@ -88,11 +88,10 @@ int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params) {
   ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_WATERMARK, 1);
   ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_OVERRUNY, 1);
   ret |= adxl345_set_measure_mode(dev, ADXL345_MEASURE_MODE);
-  
+
   if (ret == ADXL345_STATUS_SUCCESS) {
     dev->is_Setup = true;
-  }
-  else {
+  } else {
     dev->is_Setup = false;
   }
 
@@ -232,7 +231,7 @@ int8_t adxl345_set_odr(adxl345_dev *device, adxl345_odr odr) {
  *   - 0 on success.
  *   - Non-zero error code on failure.
  */
-int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale) {
+int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale_config scale) {
   uint8_t val = 0x00;
 
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT, &val) !=
@@ -241,9 +240,24 @@ int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale) {
   }
 
   val &= ~0x03;
-  val = val | scale << ADXL345_SCALE_MASK;
+  val = val | scale.scale << ADXL345_SCALE_MASK;
 
-  device->scale = scale;
+  device->scale.scale = scale.scale;
+
+  switch (scale.scale) {
+  case ADXL345_SCALE_2G:
+    device->scale.fs = ADXL345_FULL_SCALE_2G;
+    break;
+  case ADXL345_SCALE_4G:
+    device->scale.fs = ADXL345_FULL_SCALE_4G;
+    break;
+  case ADXL345_SCALE_8G:
+    device->scale.fs = ADXL345_FULL_SCALE_8G;
+    break;
+  case ADXL345_SCALE_16G:
+    device->scale.fs = ADXL345_FULL_SCALE_16G;
+    break;
+  }
 
   uint8_t data_buffer[] = {ADXL345_REG_DATA_FORMAT, val};
   return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
@@ -263,7 +277,7 @@ int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale scale) {
  *   - Non-zero error code on failure.
  */
 int8_t adxl345_set_resolution(adxl345_dev *device,
-                              adxl345_resolution resolution) {
+                              adxl345_resolution_config resolution) {
   uint8_t val = 0x00;
 
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT, &val) !=
@@ -272,9 +286,32 @@ int8_t adxl345_set_resolution(adxl345_dev *device,
   }
 
   val &= ~0x08;
-  val = val | resolution << ADXL345_RESOLUTION_MASK;
+  val = val | resolution.resolution << ADXL345_RESOLUTION_MASK;
 
-  device->resolution = resolution;
+  device->resolution.resolution = resolution.resolution;
+  if (resolution.resolution == ADXL345_RES_10BIT) {
+    device->resolution.bits = 10;
+    device->resolution.mask = 6;
+  } else {
+    switch (device->scale.scale) {
+    case ADXL345_SCALE_2G:
+      device->resolution.bits = 10;
+      device->resolution.mask = 6;
+      break;
+    case ADXL345_SCALE_4G:
+      device->resolution.bits = 11;
+      device->resolution.mask = 5;
+      break;
+    case ADXL345_SCALE_8G:
+      device->resolution.bits = 12;
+      device->resolution.mask = 4;
+      break;
+    case ADXL345_SCALE_16G:
+      device->resolution.bits = 13;
+      device->resolution.mask = 3;
+      break;
+    }
+  }
 
   uint8_t data_buffer[] = {ADXL345_REG_DATA_FORMAT, val};
   return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
@@ -545,7 +582,7 @@ int8_t adxl345_get_interrupt_status(adxl345_dev *device) {
   return ADXL345_STATUS_SUCCESS;
 }
 
-int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data) {
+int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
 
@@ -559,30 +596,12 @@ int8_t adxl345_get_axes_data_x(adxl345_dev *device, adxl345_axes_data *data) {
     return ADXL345_STATUS_API_ERR;
   }
 
-  if (device->resolution == ADXL345_RES_10BIT){
-    data->x = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-  }
-  else {
-    switch (device->scale){
-      case ADXL345_SCALE_2G:
-        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-        break;
-      case ADXL345_SCALE_4G:
-        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
-        break;
-      case ADXL345_SCALE_8G:
-        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
-        break;
-      case ADXL345_SCALE_16G:
-        data->x = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
-        break; 
-    }
-  }
+  data->raw_data.x = ((val_h << 8) | val_l) >> device->resolution.mask;
 
   return ADXL345_STATUS_SUCCESS;
 }
 
-int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data) {
+int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
 
@@ -596,30 +615,12 @@ int8_t adxl345_get_axes_data_y(adxl345_dev *device, adxl345_axes_data *data) {
     return ADXL345_STATUS_API_ERR;
   }
 
-  if (device->resolution == ADXL345_RES_10BIT){
-    data->y = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-  }
-  else {
-    switch (device->scale){
-      case ADXL345_SCALE_2G:
-        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-        break;
-      case ADXL345_SCALE_4G:
-        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
-        break;
-      case ADXL345_SCALE_8G:
-        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
-        break;
-      case ADXL345_SCALE_16G:
-        data->y = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
-        break; 
-    }
-  }
+  data->raw_data.y = ((val_h << 8) | val_l) >> device->resolution.mask;
 
   return ADXL345_STATUS_SUCCESS;
 }
 
-int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data) {
+int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
 
@@ -633,25 +634,80 @@ int8_t adxl345_get_axes_data_z(adxl345_dev *device, adxl345_axes_data *data) {
     return ADXL345_STATUS_API_ERR;
   }
 
-  if (device->resolution == ADXL345_RES_10BIT){
-    data->z = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-  }
-  else {
-    switch (device->scale){
-      case ADXL345_SCALE_2G:
-        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_10BIT_MASK;
-        break;
-      case ADXL345_SCALE_4G:
-        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_11BIT_MASK;
-        break;
-      case ADXL345_SCALE_8G:
-        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_12BIT_MASK;
-        break;
-      case ADXL345_SCALE_16G:
-        data->z = ((val_h << 8) | val_l) >> ADXL345_RES_13BIT_MASK;
-        break; 
-    }
-  }
+  data->raw_data.z = ((val_h << 8) | val_l) >> device->resolution.mask;
 
   return ADXL345_STATUS_SUCCESS;
+}
+
+int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
+  uint8_t val[6];
+
+  printf("resolution: %d\r\n", device->resolution.resolution);
+  printf("bits: %d\r\n", device->resolution.bits);
+  printf("mask: %d\r\n", device->resolution.mask);
+  printf("scale: %d\r\n", device->scale.scale);
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX1, &val[1]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX0, &val[0]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY1, &val[3]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY0, &val[2]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ1, &val[5]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ0, &val[4]) !=
+      ADXL345_STATUS_SUCCESS) {
+    return ADXL345_STATUS_API_ERR;
+  }
+
+  printf("X: 0x%.4X\r\n", (val[1] << 8) | val[0]);
+  printf("Y: 0x%.4X\r\n", (val[3] << 8) | val[3]);
+  printf("Z: 0x%.4X\r\n", (val[5] << 8) | val[4]);
+
+  data->raw_data.x = ((val[1] << 8) | val[0]) >> device->resolution.mask;
+  data->raw_data.y = ((val[3] << 8) | val[2]) >> device->resolution.mask;
+  data->raw_data.z = ((val[5] << 8) | val[4]) >> device->resolution.mask;
+
+  data->raw_data.x = twos_complement(data->raw_data.x, device->resolution.bits);
+  data->raw_data.y = twos_complement(data->raw_data.y, device->resolution.bits);
+  data->raw_data.z = twos_complement(data->raw_data.z, device->resolution.bits);
+
+  return ADXL345_STATUS_SUCCESS;
+}
+
+void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data) {
+
+  data->acc_data.x = (float)(data->raw_data.x * device->scale.fs) /
+                     (float)(1 << device->resolution.bits);
+  data->acc_data.y = (float)(data->raw_data.y * device->scale.fs) /
+                     (float)(1 << device->resolution.bits);
+  data->acc_data.z = (float)(data->raw_data.z * device->scale.fs) /
+                     (float)(1 << device->resolution.bits);
+}
+
+int16_t twos_complement(uint16_t value, int bits) {
+  uint16_t mask = (1 << bits) - 1;
+
+  if (value & (1 << (bits - 1))) {
+    return -(int16_t)((~value & mask) + 1);
+  } else {
+    return (int16_t)value;
+  }
 }
