@@ -32,7 +32,7 @@
  */
 
 int8_t adxl345_write_register_value(uint8_t dev_addr, uint8_t *data_buffer) {
-  return i2c_write_bytes(dev_addr, data_buffer);
+  return i2c_write_byte(dev_addr, data_buffer);
 }
 
 /**
@@ -148,7 +148,7 @@ int8_t adxl345_set_power_mode(adxl345_dev *device, adxl345_power_mode mode) {
   device->power_mode = mode;
 
   uint8_t data_buffer[] = {ADXL345_REG_BW_RATE, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -178,7 +178,7 @@ int8_t adxl345_set_measure_mode(adxl345_dev *device,
   device->measure = measure;
 
   uint8_t data_buffer[] = {ADXL345_REG_POWER_CTL, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -215,7 +215,7 @@ int8_t adxl345_set_odr(adxl345_dev *device, adxl345_odr odr) {
   device->odr = odr;
 
   uint8_t data_buffer[] = {ADXL345_REG_BW_RATE, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -260,7 +260,7 @@ int8_t adxl345_set_scale(adxl345_dev *device, adxl345_scale_config scale) {
   }
 
   uint8_t data_buffer[] = {ADXL345_REG_DATA_FORMAT, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -314,7 +314,7 @@ int8_t adxl345_set_resolution(adxl345_dev *device,
   }
 
   uint8_t data_buffer[] = {ADXL345_REG_DATA_FORMAT, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -335,7 +335,7 @@ int8_t adxl345_set_offset_x(adxl345_dev *device, int8_t offset) {
   device->offset_config.x = offset;
 
   uint8_t data_buffer[] = {ADXL345_REG_OFFSET_X, offset};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -356,7 +356,7 @@ int8_t adxl345_set_offset_y(adxl345_dev *device, int8_t offset) {
   device->offset_config.y = offset;
 
   uint8_t data_buffer[] = {ADXL345_REG_OFFSET_Y, offset};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -377,7 +377,7 @@ int8_t adxl345_set_offset_z(adxl345_dev *device, int8_t offset) {
   device->offset_config.z = offset;
 
   uint8_t data_buffer[] = {ADXL345_REG_OFFSET_Z, offset};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 /**
@@ -397,7 +397,7 @@ int8_t adxl345_set_tap_threshold(adxl345_dev *device, uint8_t threshold) {
   device->tap_config.threshold = threshold;
 
   uint8_t data_buffer[] = {ADXL345_REG_THRESH_TAP, threshold};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // Add doxygen
@@ -405,7 +405,7 @@ int8_t adxl345_set_tap_duration(adxl345_dev *device, int8_t duration) {
   device->tap_config.duration = duration;
 
   uint8_t data_buffer[] = {ADXL345_REG_DUR, duration};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -413,7 +413,7 @@ int8_t adxl345_set_tap_latency(adxl345_dev *device, int8_t latency) {
   device->tap_config.latency = latency;
 
   uint8_t data_buffer[] = {ADXL345_REG_LATENT, latency};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -421,7 +421,7 @@ int8_t adxl345_set_tap_window(adxl345_dev *device, int8_t window) {
   device->tap_config.window = window;
 
   uint8_t data_buffer[] = {ADXL345_REG_WINDOW, window};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -440,7 +440,7 @@ int8_t adxl345_tap_axes_enable(adxl345_dev *device,
   device->tap_config.tap_en = tap_en;
 
   uint8_t data_buffer[] = {ADXL345_REG_TAP_AXES, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -448,7 +448,7 @@ int8_t adxl345_set_activity_threshold(adxl345_dev *device, int8_t threshold) {
   device->activity_config.activity_threshold = threshold;
 
   uint8_t data_buffer[] = {ADXL345_REG_THRESH_ACT, threshold};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -456,7 +456,7 @@ int8_t adxl345_set_inactivity_threshold(adxl345_dev *device, int8_t threshold) {
   device->activity_config.inactivity_threshold = threshold;
 
   uint8_t data_buffer[] = {ADXL345_REG_THRESH_INACT, threshold};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -475,7 +475,7 @@ int8_t adxl345_set_activity_axes_enable(adxl345_dev *device,
   device->activity_config.activity_en = activity_en;
 
   uint8_t data_buffer[] = {ADXL345_REG_ACT_INACT_CTL, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -494,7 +494,7 @@ int8_t adxl345_set_inactivity_axes_enable(adxl345_dev *device,
   device->activity_config.inactivity_en = inactivity_en;
 
   uint8_t data_buffer[] = {ADXL345_REG_ACT_INACT_CTL, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -502,7 +502,7 @@ int8_t adxl345_set_freefall_threshold(adxl345_dev *device, int8_t threshold) {
   device->freefall_config.threshold = threshold;
 
   uint8_t data_buffer[] = {ADXL345_REG_THRESH_FF, threshold};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -510,7 +510,7 @@ int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout) {
   device->freefall_config.timeout = timeout;
 
   uint8_t data_buffer[] = {ADXL345_REG_TIME_FF, timeout};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -544,7 +544,7 @@ int8_t adxl345_set_interrupt_enable(adxl345_dev *device, uint8_t interrupt,
   val = val | enable << interrupt;
 
   uint8_t data_buffer[] = {ADXL345_REG_INT_ENABLE, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN
@@ -559,7 +559,7 @@ int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
   val = val | map << interrupt;
 
   uint8_t data_buffer[] = {ADXL345_REG_INT_MAP, val};
-  return i2c_write_bytes(ADXL345_I2C_ADDRESS, data_buffer);
+  return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
 // ADD DOXYGEN

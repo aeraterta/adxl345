@@ -29,9 +29,9 @@ void test_adxl345_set_power_mode(void) {
   i2c_read_byte_IgnoreArg_read_data();
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_power_mode(&dev, ADXL345_NORMAL_MODE));
@@ -45,9 +45,9 @@ void test_adxl345_set_measure_mode(void) {
   i2c_read_byte_IgnoreArg_read_data();
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_measure_mode(&dev, ADXL345_MEASURE_MODE));
@@ -61,9 +61,9 @@ void test_adxl345_set_odr_sucessful(void) {
   i2c_read_byte_IgnoreArg_read_data();
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_odr(&dev, ADXL345_ODR_200HZ));
@@ -89,9 +89,9 @@ void test_adxl345_set_scale(void) {
   i2c_read_byte_IgnoreArg_read_data();
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_set_scale(&dev, scale));
   TEST_ASSERT_EQUAL(dev.scale.scale, ADXL345_SCALE_8G);
@@ -108,9 +108,9 @@ void test_adxl345_set_resolution(void) {
   i2c_read_byte_IgnoreArg_read_data();
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_resolution(&dev, resolution));
@@ -120,9 +120,9 @@ void test_adxl345_set_resolution(void) {
 }
 
 void test_adxl345_set_tap_threshold(void) {
-  i2c_write_bytes_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
                                   ADXL345_STATUS_SUCCESS);
-  i2c_write_bytes_IgnoreArg_data_buffer();
+  i2c_write_byte_IgnoreArg_data_buffer();
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_tap_threshold(&dev, 0x10));
   TEST_ASSERT_EQUAL(dev.tap_config.threshold, 0x10);
