@@ -8,6 +8,7 @@
 
 static adxl345_dev dev;
 static adxl345_init_param init_param;
+adxl345_axes_data adxl345_data;
 
 void test_adxl345_setup(void) {}
 
@@ -82,7 +83,7 @@ void test_adxl345_set_odr_invalid_odr(void) {
 void test_adxl345_set_scale(void) {
   uint8_t read_data_result = 0x00;
   adxl345_scale_config scale;
-  scale.scale = ADXL345_SCALE_8G;
+  scale.scale = ADXL345_SCALE_2G;
 
   i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT,
                                 NULL, ADXL345_STATUS_SUCCESS);
@@ -94,8 +95,8 @@ void test_adxl345_set_scale(void) {
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_set_scale(&dev, scale));
-  TEST_ASSERT_EQUAL(dev.scale.scale, ADXL345_SCALE_8G);
-  TEST_ASSERT_EQUAL(dev.scale.fs, ADXL345_FULL_SCALE_8G);
+  TEST_ASSERT_EQUAL(dev.scale.scale, ADXL345_SCALE_2G);
+  TEST_ASSERT_EQUAL(dev.scale.fs, ADXL345_FULL_SCALE_2G);
 }
 
 void test_adxl345_set_resolution(void) {
@@ -115,8 +116,8 @@ void test_adxl345_set_resolution(void) {
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
                     adxl345_set_resolution(&dev, resolution));
   TEST_ASSERT_EQUAL(dev.resolution.resolution, ADXL345_RES_FULL);
-  TEST_ASSERT_EQUAL(dev.resolution.bits, 12);
-  TEST_ASSERT_EQUAL(dev.resolution.mask, 4);
+  TEST_ASSERT_EQUAL(dev.resolution.bits, 10);
+  TEST_ASSERT_EQUAL(dev.resolution.mask, 6);
 }
 
 void test_adxl345_set_tap_threshold(void) {
@@ -311,4 +312,57 @@ void test_adxl345_get_interrupt_status(void) {
   TEST_ASSERT_FALSE(dev.interrupt_status.free_fall);
   TEST_ASSERT_TRUE(dev.interrupt_status.watermark);
   TEST_ASSERT_TRUE(dev.interrupt_status.overrun);
+}
+
+void test_adxl345_get_raw_xyz(void) {
+  uint8_t val[6];
+  val[0] = 0x40; // X LSB
+  val[1] = 0xFC; // X MSB
+  val[2] = 0xFD; // Y LSB
+  val[3] = 0xFD; // Y MSB
+  val[4] = 0x80; // Z LSB
+  val[5] = 0x3A; // Z MSB
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX1, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[1]);
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX0, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[0]);
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY1, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[3]);
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY0, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[2]);
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ1, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[5]);
+
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ0, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&val[4]);
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_get_raw_xyz(&dev, &adxl345_data));
+  TEST_ASSERT_EQUAL(adxl345_data.raw_data.x, -15);
+  TEST_ASSERT_EQUAL(adxl345_data.raw_data.y, -9);
+  TEST_ASSERT_EQUAL(adxl345_data.raw_data.z, 234);
+}
+
+void test_adxl345_get_acc_xyz(void) {
+  adxl345_get_acc_xyz(&dev, &adxl345_data);
+  TEST_ASSERT_FLOAT_WITHIN(0.01, -0.06, adxl345_data.acc_data.x);
+  TEST_ASSERT_FLOAT_WITHIN(0.01, -0.04, adxl345_data.acc_data.y);
+  TEST_ASSERT_FLOAT_WITHIN(0.01, 0.91, adxl345_data.acc_data.z);
 }

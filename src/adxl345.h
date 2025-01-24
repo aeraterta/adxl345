@@ -337,12 +337,6 @@ int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
 
 int8_t adxl345_get_interrupt_status(adxl345_dev *device);
 
-int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data);
-
-int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data);
-
-int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data);
-
 int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data);
 
 void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data);

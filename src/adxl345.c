@@ -779,108 +779,6 @@ int8_t adxl345_get_interrupt_status(adxl345_dev *device) {
 }
 
 /**
- * @brief Get the raw X-axis acceleration data from the ADXL345 accelerometer.
- *
- * Reads the X-axis acceleration data registers and updates the raw data in the
- * provided `adxl345_axes_data` structure. The data is right-shifted according
- * to the device's resolution setting.
- *
- * @param device Pointer to the ADXL345 device structure.
- * @param data Pointer to the structure where the raw X-axis data will be
- * stored.
- *
- * @return
- *   - 0 on success.
- *   - Non-zero error code on failure.
- */
-int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data) {
-  uint8_t val_l = 0x00;
-  uint8_t val_h = 0x00;
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX1, &val_h) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAX0, &val_l) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  data->raw_data.x = ((val_h << 8) | val_l) >> device->resolution.mask;
-
-  return ADXL345_STATUS_SUCCESS;
-}
-
-/**
- * @brief Get the raw Y-axis acceleration data from the ADXL345 accelerometer.
- *
- * Reads the Y-axis acceleration data registers and updates the raw data in the
- * provided `adxl345_axes_data` structure. The data is right-shifted according
- * to the device's resolution setting.
- *
- * @param device Pointer to the ADXL345 device structure.
- * @param data Pointer to the structure where the raw Y-axis data will be
- * stored.
- *
- * @return
- *   - 0 on success.
- *   - Non-zero error code on failure.
- */
-int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data) {
-  uint8_t val_l = 0x00;
-  uint8_t val_h = 0x00;
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY1, &val_h) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAY0, &val_l) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  data->raw_data.y = ((val_h << 8) | val_l) >> device->resolution.mask;
-
-  return ADXL345_STATUS_SUCCESS;
-}
-
-/**
- * @brief Get the raw Z-axis acceleration data from the ADXL345 accelerometer.
- *
- * Reads the Z-axis acceleration data registers and updates the raw data in the
- * provided `adxl345_axes_data` structure. The data is right-shifted according
- * to the device's resolution setting.
- *
- * @param device Pointer to the ADXL345 device structure.
- * @param data Pointer to the structure where the raw Z-axis data will be
- * stored.
- *
- * @return
- *   - 0 on success.
- *   - Non-zero error code on failure.
- */
-int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data) {
-  uint8_t val_l = 0x00;
-  uint8_t val_h = 0x00;
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ1, &val_h) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_DATAZ0, &val_l) !=
-      ADXL345_STATUS_SUCCESS) {
-    return ADXL345_STATUS_API_ERR;
-  }
-
-  data->raw_data.z = ((val_h << 8) | val_l) >> device->resolution.mask;
-
-  return ADXL345_STATUS_SUCCESS;
-}
-
-/**
  * @brief Get the raw X, Y, and Z-axis acceleration data from the ADXL345
  * accelerometer.
  *
@@ -955,11 +853,13 @@ int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
  */
 void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data) {
 
-  data->acc_data.x = (float)(data->raw_data.x * device->scale.fs) /
+  float full_scale_range = device->scale.fs / 1.0f;
+
+  data->acc_data.x = (float)(data->raw_data.x * full_scale_range) /
                      (float)(1 << device->resolution.bits);
-  data->acc_data.y = (float)(data->raw_data.y * device->scale.fs) /
+  data->acc_data.y = (float)(data->raw_data.y * full_scale_range) /
                      (float)(1 << device->resolution.bits);
-  data->acc_data.z = (float)(data->raw_data.z * device->scale.fs) /
+  data->acc_data.z = (float)(data->raw_data.z * full_scale_range) /
                      (float)(1 << device->resolution.bits);
 }
 
