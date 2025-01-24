@@ -275,6 +275,10 @@ typedef struct {
 
 int8_t adxl345_write_register_value(uint8_t dev_addr, uint8_t *data_buffer);
 
+int8_t adxl345_multiple_write_register_value(uint8_t dev_addr,
+                                             uint8_t *data_buffer,
+                                             uint32_t bytecount);
+
 int8_t adxl345_read_register_value(uint8_t address, uint8_t *val);
 
 int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params);

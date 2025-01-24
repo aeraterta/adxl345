@@ -30,7 +30,7 @@ void test_adxl345_set_power_mode(void) {
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
@@ -46,7 +46,7 @@ void test_adxl345_set_measure_mode(void) {
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
@@ -62,7 +62,7 @@ void test_adxl345_set_odr_sucessful(void) {
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
@@ -90,7 +90,7 @@ void test_adxl345_set_scale(void) {
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_set_scale(&dev, scale));
@@ -109,7 +109,7 @@ void test_adxl345_set_resolution(void) {
   i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
 
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
 
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
@@ -121,9 +121,194 @@ void test_adxl345_set_resolution(void) {
 
 void test_adxl345_set_tap_threshold(void) {
   i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
-                                  ADXL345_STATUS_SUCCESS);
+                                 ADXL345_STATUS_SUCCESS);
   i2c_write_byte_IgnoreArg_data_buffer();
   TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
-                    adxl345_set_tap_threshold(&dev, 0x10));
-  TEST_ASSERT_EQUAL(dev.tap_config.threshold, 0x10);
+                    adxl345_set_tap_threshold(&dev, 0x32));
+  TEST_ASSERT_EQUAL(dev.tap_config.threshold, 0x32);
+  // 62.5mg per increment
+}
+
+void test_adxl345_set_tap_duration(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_tap_duration(&dev, 0xF));
+  TEST_ASSERT_EQUAL(dev.tap_config.duration, 0xF);
+  // 625us per increment
+}
+
+void test_adxl345_set_tap_latency(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_tap_latency(&dev, 0x50));
+  TEST_ASSERT_EQUAL(dev.tap_config.latency, 0x50);
+  // 1.25ms per increment
+}
+
+void test_adxl345_set_tap_window(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_set_tap_window(&dev, 0xC8));
+  TEST_ASSERT_EQUAL(dev.tap_config.window, 0xC8);
+  // 1.25ms per increment
+}
+
+void test_adxl345_tap_axes_enable(void) {
+  uint8_t read_data_result = 0x00;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_TAP_AXES, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_tap_axes_enable(&dev, AXES_ENABLE_XYZ));
+  TEST_ASSERT_EQUAL(dev.tap_config.tap_en, AXES_ENABLE_XYZ);
+}
+
+void test_adxl345_set_activity_threshold(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_activity_threshold(&dev, 0xF));
+  TEST_ASSERT_EQUAL(dev.activity_config.activity_threshold, 0xF);
+}
+
+void test_adxl345_set_inactivity_threshold(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_inactivity_threshold(&dev, 0xF));
+  TEST_ASSERT_EQUAL(dev.activity_config.inactivity_threshold, 0xF);
+}
+
+void test_adxl345_set_activity_axes_enable(void) {
+  uint8_t read_data_result = 0x00;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_INACT_CTL,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_activity_axes_enable(&dev, AXES_ENABLE_XYZ));
+  TEST_ASSERT_EQUAL(dev.activity_config.activity_en, AXES_ENABLE_XYZ);
+}
+
+void test_adxl345_set_inactivity_axes_enable(void) {
+  uint8_t read_data_result = 0x00;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_INACT_CTL,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_inactivity_axes_enable(&dev, AXES_ENABLE_XYZ));
+  TEST_ASSERT_EQUAL(dev.activity_config.inactivity_en, AXES_ENABLE_XYZ);
+}
+
+void test_adxl345_set_freefall_threshold(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_freefall_threshold(&dev, 0xF));
+  TEST_ASSERT_EQUAL(dev.freefall_config.threshold, 0xF);
+}
+
+void test_adxl345_set_freefall_timeout(void) {
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_freefall_timeout(&dev, 0xF));
+  TEST_ASSERT_EQUAL(dev.freefall_config.timeout, 0xF);
+}
+
+void test_adxl345_get_activity_tap_status(void) {
+  uint8_t read_data_result = 0x01;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_TAP_STATUS,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_get_activity_tap_status(&dev));
+
+  TEST_ASSERT_FALSE(dev.activity_config.activity_status.x);
+  TEST_ASSERT_FALSE(dev.activity_config.activity_status.y);
+  TEST_ASSERT_FALSE(dev.activity_config.activity_status.z);
+
+  TEST_ASSERT_FALSE(dev.tap_config.tap_status.x);
+  TEST_ASSERT_FALSE(dev.tap_config.tap_status.y);
+  TEST_ASSERT_TRUE(dev.tap_config.tap_status.z);
+}
+
+void test_adxl345_set_interrupt_enable(void) {
+  uint8_t read_data_result = 0x00;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+
+  TEST_ASSERT_EQUAL(
+      ADXL345_STATUS_SUCCESS,
+      adxl345_set_interrupt_enable(&dev, ADXL345_INT_DATA_READY, 1));
+}
+
+void test_adxl345_set_interrupt_map(void) {
+  uint8_t read_data_result = 0x00;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_MAP, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, NULL,
+                                 ADXL345_STATUS_SUCCESS);
+  i2c_write_byte_IgnoreArg_data_buffer();
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS,
+                    adxl345_set_interrupt_map(&dev, ADXL345_INT_DATA_READY,
+                                              ADXL345_INT1_PIN));
+}
+
+void test_adxl345_get_interrupt_status(void) {
+  uint8_t read_data_result = 0x83;
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_SOURCE,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&read_data_result);
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_get_interrupt_status(&dev));
+
+  TEST_ASSERT_TRUE(dev.interrupt_status.data_ready);
+  TEST_ASSERT_FALSE(dev.interrupt_status.single_tap);
+  TEST_ASSERT_FALSE(dev.interrupt_status.double_tap);
+  TEST_ASSERT_FALSE(dev.interrupt_status.activity);
+
+  TEST_ASSERT_FALSE(dev.interrupt_status.inactivity);
+  TEST_ASSERT_FALSE(dev.interrupt_status.free_fall);
+  TEST_ASSERT_TRUE(dev.interrupt_status.watermark);
+  TEST_ASSERT_TRUE(dev.interrupt_status.overrun);
 }

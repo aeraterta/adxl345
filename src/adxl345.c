@@ -36,6 +36,24 @@ int8_t adxl345_write_register_value(uint8_t dev_addr, uint8_t *data_buffer) {
 }
 
 /**
+ * @brief Write a multiple values to a register from the ADXL345 accelerometer.
+ *
+ * @param dev_addr The register address to write the value from.
+ * @param data_buffer Pointer to the buffer containing the data to be written.
+ * @param bytecount Number of bytes to be sent to the register address.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
+
+int8_t adxl345_multiple_write_register_value(uint8_t dev_addr,
+                                             uint8_t *data_buffer,
+                                             uint32_t bytecount) {
+  return i2c_write_multiple_bytes(dev_addr, data_buffer, bytecount);
+}
+
+/**
  * @brief Read a register value from the ADXL345 accelerometer.
  *
  * @param address The register address to read the value from.
@@ -400,7 +418,19 @@ int8_t adxl345_set_tap_threshold(adxl345_dev *device, uint8_t threshold) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// Add doxygen
+/**
+ * @brief Set the tap duration for the ADXL345 accelerometer.
+ *
+ * Configures the maximum time that an event must be above the tap threshold to
+ * qualify as a tap. Each LSB represents 625 µs.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param duration The desired tap duration (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_tap_duration(adxl345_dev *device, int8_t duration) {
   device->tap_config.duration = duration;
 
@@ -408,7 +438,19 @@ int8_t adxl345_set_tap_duration(adxl345_dev *device, int8_t duration) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the tap latency for the ADXL345 accelerometer.
+ *
+ * Configures the wait time between the detection of a single tap and the time
+ * window for a double tap to begin. Each LSB represents 1.25 ms.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param latency The desired tap latency (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_tap_latency(adxl345_dev *device, int8_t latency) {
   device->tap_config.latency = latency;
 
@@ -416,7 +458,19 @@ int8_t adxl345_set_tap_latency(adxl345_dev *device, int8_t latency) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the tap window for the ADXL345 accelerometer.
+ *
+ * Configures the maximum time that can elapse after the latency period in which
+ * a second tap can be detected. Each LSB represents 1.25 ms.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param window The desired tap window (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_tap_window(adxl345_dev *device, int8_t window) {
   device->tap_config.window = window;
 
@@ -424,7 +478,23 @@ int8_t adxl345_set_tap_window(adxl345_dev *device, int8_t window) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Enable or disable tap detection on the axes for the ADXL345
+ * accelerometer.
+ *
+ * Configures which axes are enabled for tap detection. This can be configured
+ * to detect taps on the X, Y, and/or Z axes by setting the corresponding bits.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param tap_en Bitmask to enable or disable axes for tap detection:
+ *               - Bit 0: X-axis
+ *               - Bit 1: Y-axis
+ *               - Bit 2: Z-axis
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_tap_axes_enable(adxl345_dev *device,
                                adxl345_axes_enable tap_en) {
   uint8_t val = 0x00;
@@ -443,7 +513,19 @@ int8_t adxl345_tap_axes_enable(adxl345_dev *device,
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the activity threshold for the ADXL345 accelerometer.
+ *
+ * Configures the activity threshold to determine the minimum acceleration
+ * needed to qualify as activity. Each LSB represents 62.5 mg.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param threshold The desired activity threshold (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_activity_threshold(adxl345_dev *device, int8_t threshold) {
   device->activity_config.activity_threshold = threshold;
 
@@ -451,7 +533,19 @@ int8_t adxl345_set_activity_threshold(adxl345_dev *device, int8_t threshold) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the inactivity threshold for the ADXL345 accelerometer.
+ *
+ * Configures the inactivity threshold to determine the minimum acceleration
+ * needed to qualify as inactivity. Each LSB represents 62.5 mg.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param threshold The desired inactivity threshold (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_inactivity_threshold(adxl345_dev *device, int8_t threshold) {
   device->activity_config.inactivity_threshold = threshold;
 
@@ -459,7 +553,21 @@ int8_t adxl345_set_inactivity_threshold(adxl345_dev *device, int8_t threshold) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Enable or disable activity detection on the axes for the ADXL345
+ * accelerometer.
+ *
+ * Configures which axes are enabled for activity detection. This can be
+ * configured to detect activity on the X, Y, and/or Z axes by setting the
+ * corresponding bits.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param activity_en Bitmask to enable or disable axes for activity detection:
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_activity_axes_enable(adxl345_dev *device,
                                         adxl345_axes_enable activity_en) {
   uint8_t val = 0x00;
@@ -478,7 +586,22 @@ int8_t adxl345_set_activity_axes_enable(adxl345_dev *device,
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Enable or disable inactivity detection on the axes for the ADXL345
+ * accelerometer.
+ *
+ * Configures which axes are enabled for inactivity detection. This can be
+ * configured to detect inactivity on the X, Y, and/or Z axes by setting the
+ * corresponding bits.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param inactivity_en Bitmask to enable or disable axes for inactivity
+ * detection:
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_inactivity_axes_enable(adxl345_dev *device,
                                           adxl345_axes_enable inactivity_en) {
   uint8_t val = 0x00;
@@ -497,7 +620,19 @@ int8_t adxl345_set_inactivity_axes_enable(adxl345_dev *device,
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the free-fall threshold for the ADXL345 accelerometer.
+ *
+ * Configures the acceleration threshold to detect free-fall events.
+ * Each LSB represents 62.5 mg.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param threshold The desired free-fall threshold (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_freefall_threshold(adxl345_dev *device, int8_t threshold) {
   device->freefall_config.threshold = threshold;
 
@@ -505,7 +640,19 @@ int8_t adxl345_set_freefall_threshold(adxl345_dev *device, int8_t threshold) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Set the free-fall timeout for the ADXL345 accelerometer.
+ *
+ * Configures the amount of time that acceleration must remain below the
+ * free-fall threshold to register a free-fall event. Each LSB represents 5 ms.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param timeout The desired free-fall timeout (0-255).
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout) {
   device->freefall_config.timeout = timeout;
 
@@ -513,7 +660,19 @@ int8_t adxl345_set_freefall_timeout(adxl345_dev *device, int8_t timeout) {
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Get the activity and tap status from the ADXL345 accelerometer.
+ *
+ * Reads the activity and tap status registers and updates the device structure
+ * with the current status of activity and tap detection on the X, Y, and Z
+ * axes.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_activity_tap_status(adxl345_dev *device) {
   uint8_t val = 0x00;
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_ACT_TAP_STATUS, &val) !=
@@ -532,7 +691,20 @@ int8_t adxl345_get_activity_tap_status(adxl345_dev *device) {
   return ADXL345_STATUS_SUCCESS;
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Enable or disable specific interrupts on the ADXL345 accelerometer.
+ *
+ * Configures the interrupt enable register to enable or disable specific
+ * interrupts.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param interrupt The interrupt to configure (0-7).
+ * @param enable Set to 1 to enable the interrupt or 0 to disable it.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_interrupt_enable(adxl345_dev *device, uint8_t interrupt,
                                     int enable) {
   uint8_t val = 0x00;
@@ -547,7 +719,20 @@ int8_t adxl345_set_interrupt_enable(adxl345_dev *device, uint8_t interrupt,
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Map an interrupt to a specific pin for the ADXL345 accelerometer.
+ *
+ * Configures the interrupt map register to route a specific interrupt to
+ * either INT1 or INT2 pin.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param interrupt The interrupt to configure (0-7).
+ * @param map Set to 1 to map the interrupt to INT2 or 0 to map it to INT1.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
                                  int map) {
   uint8_t val = 0x00;
@@ -562,7 +747,18 @@ int8_t adxl345_set_interrupt_map(adxl345_dev *device, uint8_t interrupt,
   return i2c_write_byte(ADXL345_I2C_ADDRESS, data_buffer);
 }
 
-// ADD DOXYGEN
+/**
+ * @brief Get the interrupt status from the ADXL345 accelerometer.
+ *
+ * Reads the interrupt source register and updates the device structure with
+ * the current status of active interrupts.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_interrupt_status(adxl345_dev *device) {
   uint8_t val = 0x00;
   if (i2c_read_byte(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_SOURCE, &val) !=
@@ -582,6 +778,21 @@ int8_t adxl345_get_interrupt_status(adxl345_dev *device) {
   return ADXL345_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Get the raw X-axis acceleration data from the ADXL345 accelerometer.
+ *
+ * Reads the X-axis acceleration data registers and updates the raw data in the
+ * provided `adxl345_axes_data` structure. The data is right-shifted according
+ * to the device's resolution setting.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param data Pointer to the structure where the raw X-axis data will be
+ * stored.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
@@ -601,6 +812,21 @@ int8_t adxl345_get_raw_x(adxl345_dev *device, adxl345_axes_data *data) {
   return ADXL345_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Get the raw Y-axis acceleration data from the ADXL345 accelerometer.
+ *
+ * Reads the Y-axis acceleration data registers and updates the raw data in the
+ * provided `adxl345_axes_data` structure. The data is right-shifted according
+ * to the device's resolution setting.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param data Pointer to the structure where the raw Y-axis data will be
+ * stored.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
@@ -620,6 +846,21 @@ int8_t adxl345_get_raw_y(adxl345_dev *device, adxl345_axes_data *data) {
   return ADXL345_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Get the raw Z-axis acceleration data from the ADXL345 accelerometer.
+ *
+ * Reads the Z-axis acceleration data registers and updates the raw data in the
+ * provided `adxl345_axes_data` structure. The data is right-shifted according
+ * to the device's resolution setting.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param data Pointer to the structure where the raw Z-axis data will be
+ * stored.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val_l = 0x00;
   uint8_t val_h = 0x00;
@@ -639,6 +880,22 @@ int8_t adxl345_get_raw_z(adxl345_dev *device, adxl345_axes_data *data) {
   return ADXL345_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Get the raw X, Y, and Z-axis acceleration data from the ADXL345
+ * accelerometer.
+ *
+ * Reads the acceleration data registers for the X, Y, and Z axes and updates
+ * the raw data in the provided `adxl345_axes_data` structure. The data is
+ * right-shifted according to the device's resolution setting.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param data Pointer to the structure where the raw X, Y, and Z-axis data will
+ * be stored.
+ *
+ * @return
+ *   - 0 on success.
+ *   - Non-zero error code on failure.
+ */
 int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
   uint8_t val[6];
 
@@ -683,6 +940,19 @@ int8_t adxl345_get_raw_xyz(adxl345_dev *device, adxl345_axes_data *data) {
   return ADXL345_STATUS_SUCCESS;
 }
 
+/**
+ * @brief Get the X, Y, and Z-axis acceleration values in g from the ADXL345
+ * accelerometer.
+ *
+ * Reads the acceleration data registers for the X, Y, and Z axes, converts them
+ * from raw two's complement format, and updates the provided
+ * `adxl345_axes_data` structure. The values are scaled to represent
+ * acceleration in g.
+ *
+ * @param device Pointer to the ADXL345 device structure.
+ * @param data Pointer to the structure where the X, Y, and Z-axis acceleration
+ * values (in g) will be stored.
+ */
 void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data) {
 
   data->acc_data.x = (float)(data->raw_data.x * device->scale.fs) /
@@ -693,6 +963,17 @@ void adxl345_get_acc_xyz(adxl345_dev *device, adxl345_axes_data *data) {
                      (float)(1 << device->resolution.bits);
 }
 
+/**
+ * @brief Convert a raw unsigned value to a signed two's complement value.
+ *
+ * This function converts an unsigned integer into a signed integer
+ * using the two's complement representation based on the specified bit width.
+ *
+ * @param value The raw unsigned value.
+ * @param bits The number of bits used to represent the value.
+ *
+ * @return The signed two's complement value.
+ */
 int16_t twos_complement(uint16_t value, int bits) {
   uint16_t mask = (1 << bits) - 1;
 
