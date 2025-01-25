@@ -10,7 +10,124 @@ static adxl345_dev dev;
 static adxl345_init_param init_param;
 adxl345_axes_data adxl345_data;
 
-void test_adxl345_setup(void) {}
+void setUp(void) {
+  init_param.power_mode            = ADXL345_NORMAL_MODE;
+  init_param.odr                   = ADXL345_ODR_200HZ;
+  init_param.scale.scale           = ADXL345_SCALE_2G;
+  init_param.resolution.resolution = ADXL345_RES_FULL;
+}
+
+void test_adxl345_setup(void) {
+  uint8_t measure_standby = 0x00;
+  uint8_t power_mode      = 0x00;
+  uint8_t odr             = 0x00;
+  uint8_t scale           = 0x00;
+  uint8_t resolution      = 0x20;
+  uint8_t int_dataready   = 0x00;
+  uint8_t int_watermark   = 0x80;
+  uint8_t int_overrun     = 0x82;
+  uint8_t measure_normal  = 0x00;
+
+  uint8_t measure_standby_ret[] = {ADXL345_REG_POWER_CTL, 0x00};
+  uint8_t power_mode_ret[]      = {ADXL345_REG_BW_RATE, 0x00};
+  uint8_t odr_ret[]             = {ADXL345_REG_BW_RATE, 0x0F};
+  uint8_t scale_ret[]           = {ADXL345_REG_DATA_FORMAT, 0x00};
+  uint8_t resolution_ret[]      = {ADXL345_REG_DATA_FORMAT, 0x01};
+  uint8_t int_drdy_ret[]        = {ADXL345_REG_INT_ENABLE, 0x80};
+  uint8_t int_wtrmrk_ret[]      = {ADXL345_REG_INT_ENABLE, 0x82};
+  uint8_t int_ovrrn_ret[]       = {ADXL345_REG_INT_ENABLE, 0x83};
+  uint8_t measure_normal_ret[]  = {ADXL345_REG_POWER_CTL, 0x01};
+
+  i2c_init_ExpectAndReturn(true);
+
+  // Put ADXL345 to stand-by mode
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_POWER_CTL,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&measure_standby);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, measure_standby_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set power mode
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_BW_RATE, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&power_mode);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, power_mode_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set odr
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_BW_RATE, NULL,
+                                ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&odr);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, odr_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set scale
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&scale);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, scale_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set scale
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_DATA_FORMAT,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&resolution);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, resolution_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set data ready interrupt
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&int_dataready);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, int_drdy_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set watermark interrupt
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&int_watermark);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, int_wtrmrk_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Mock set overrun interrupt
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_INT_ENABLE,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&int_overrun);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, int_ovrrn_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  // Put ADXL345 to measure mode
+  i2c_read_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, ADXL345_REG_POWER_CTL,
+                                NULL, ADXL345_STATUS_SUCCESS);
+  i2c_read_byte_IgnoreArg_read_data();
+  i2c_read_byte_ReturnThruPtr_read_data(&measure_normal);
+
+  i2c_write_byte_ExpectAndReturn(ADXL345_I2C_ADDRESS, measure_normal_ret,
+                                 ADXL345_STATUS_SUCCESS);
+
+  TEST_ASSERT_EQUAL(ADXL345_STATUS_SUCCESS, adxl345_setup(&dev, init_param));
+  TEST_ASSERT_EQUAL(ADXL345_NORMAL_MODE, dev.power_mode);
+  TEST_ASSERT_EQUAL(ADXL345_ODR_200HZ, dev.odr);
+  TEST_ASSERT_EQUAL(ADXL345_SCALE_2G, dev.scale.scale);
+  TEST_ASSERT_EQUAL(ADXL345_RES_FULL, dev.resolution.resolution);
+  TEST_ASSERT_TRUE(dev.is_Setup);
+}
 
 void test_adxl345_online(void) {
   uint8_t read_data_result = 0xE5;

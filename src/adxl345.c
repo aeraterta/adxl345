@@ -104,7 +104,7 @@ int8_t adxl345_setup(adxl345_dev *dev, adxl345_init_param adxl345_params) {
   ret |= adxl345_set_resolution(dev, dev->resolution);
   ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_DATA_READY, 1);
   ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_WATERMARK, 1);
-  ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_OVERRUNY, 1);
+  ret |= adxl345_set_interrupt_enable(dev, ADXL345_INT_OVERRUN, 1);
   ret |= adxl345_set_measure_mode(dev, ADXL345_MEASURE_MODE);
 
   if (ret == ADXL345_STATUS_SUCCESS) {
