@@ -21,13 +21,13 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0'
+          ruby-version: '3.4.4'
 
       - name: Install specific Ceedling version
-        run: gem install ceedling -v 0.31.1
+        run: gem install ceedling -v 1.0.1
 
       - name: Install gcc-avr
         run: sudo apt-get update && sudo apt-get install -y gcc-avr
 
       - name: Run Ceedling tests
-        run: ceedling test:all
+        run: ceedling test:all gcov:all
