@@ -29,5 +29,8 @@ jobs:
       - name: Install gcc-avr
         run: sudo apt-get update && sudo apt-get install -y gcc-avr
 
-      - name: Run Ceedling tests
+      - name: Install gcovr
+        run: pip install gcovr
+
+      - name: Run Ceedling tests with coverage
         run: ceedling test:all gcov:all
